@@ -12,7 +12,7 @@ service:
 containers:
   frontend:
     variables:
-      HELLO: WORLD
+      HELLO: WORLD-1      
 
 resources:
   dns: # We need a DNS record to point to the service 
