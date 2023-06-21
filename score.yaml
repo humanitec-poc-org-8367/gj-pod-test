@@ -12,7 +12,7 @@ service:
 containers:
   frontend:
     variables:
-      HELLO: WORLD
+      HELLO1: WORLD1
       CONNECTION_STRING: postgresql://${resources.psql-db.username}:${resources.psql-db.password}@${resources.psql-db.host}:${resources.psql-db.port}/${resources.psql-db.name}
 
 resources:
