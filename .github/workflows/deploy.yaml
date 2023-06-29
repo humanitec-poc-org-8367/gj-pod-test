@@ -2,15 +2,15 @@ name: Deploy Gj-pod-test
 
 on:
   push:
-    branches: main
+    branches: gaurav
 
 concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  ECR: 675957821105.dkr.ecr.us-east-1.amazonaws.com
-  IMAGE: myapp
+  GCR: us-east1-docker.pkg.dev # GCR artifactory
+  IMAGE: l-ulti-tf-48hours-d55d/ukg-48h-humanitec/myapp # image path
 
 jobs:
   deploy:
@@ -20,31 +20,27 @@ jobs:
       - uses: actions/checkout@v3
       - name: Set Tag with SHA
         run: echo "TAG=`echo $GITHUB_SHA | cut -c 1-7`" >> $GITHUB_ENV
-
+      
       - run: |
-          aws ecr get-login-password --region us-east-1 \
-            | docker login \
-                --username $username \
-                --password-stdin \
-                $ECR
-        env:
-          username: ${{ secrets.ECR_USER }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_POC_12 }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_POC_12 }}
+          cat $keyfile | docker login -u _json_key --password-stdin \
+          https://$GCR
 
-      - run: docker build --platform linux/amd64 . -t $ECR/$IMAGE:$TAG
-      - run: docker push $ECR/$IMAGE:$TAG
+        env:
+          keyfile: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - run: docker build --platform linux/amd64 . -t $GCR/$IMAGE:$TAG
+      - run: docker push $GCR/$IMAGE:$TAG
 
       - name: Inform Humanitec
         run: |-
           curl \
-            --request POST 'https://api.humanitec.io/orgs/${{ secrets.HUMANITEC_ORG_ID_POC_12 }}/images/myapp/builds' \
-            --header 'Authorization: Bearer ${{ secrets.HUMANITEC_TOKEN_POC_12 }}' \
+            --request POST 'https://api.humanitec.io/orgs/${{ secrets.HUMANITEC_ORG_ID_UKG_48_HRS }}/images/myapp/builds' \
+            --header 'Authorization: Bearer ${{ secrets.HUMANITEC_TOKEN_UKG_48_HRS }}' \
             --header 'Content-Type: application/json' \
             --data-raw '{
                 "branch": "'$GITHUB_REF_NAME'",
                 "commit": "'$GITHUB_SHA'",
-                "image": "'$ECR/$IMAGE:$TAG'",
+                "image": "'$GCR/$IMAGE:$TAG'",
                 "tags": ["'$TAG'"]
             }'
       - name: Deploy using Score
@@ -55,16 +51,13 @@ jobs:
           cat <<EOF > humanitec.score.yaml
           apiVersion: humanitec.org/v1b1
           spec:
-            ingress:
-              rules:
-                "\${resources.dns}": # This is the DNS record that we defined in the resources section
-                  http:
-                    "/":
-                      type: prefix
-                      port: 80
+            labels:
+              env_type: development
+
           containers:
             frontend:
-              image: $ECR/$IMAGE:$TAG
+              image: $GCR/$IMAGE:$TAG
+
           EOF
 
-          ./score-humanitec delta --env development --overrides ./humanitec.score.yaml --app gj-pod-test --org="${{ secrets.HUMANITEC_ORG_ID_POC_12 }}" --token "${{ secrets.HUMANITEC_TOKEN_POC_12 }}" --deploy
+          ./score-humanitec delta --env development --overrides ./humanitec.score.yaml --app gj-demo-app --org="${{ secrets.HUMANITEC_ORG_ID_UKG_48_HRS }}" --token "${{ secrets.HUMANITEC_TOKEN_UKG_48_HRS }}" --deploy

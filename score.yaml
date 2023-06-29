@@ -14,12 +14,15 @@ containers:
     variables:
       HELLO1: WORLD1
       CONNECTION_STRING: postgresql://${resources.psql-db.username}:${resources.psql-db.password}@${resources.psql-db.host}:${resources.psql-db.port}/${resources.psql-db.name}
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu:  "500m"
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
 
 resources:
-  dns: # We need a DNS record to point to the service 
-    type: dns
-  bucket:
-    type: s3
   psql-db:
     type: postgres
     properties:
