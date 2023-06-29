@@ -1,7 +1,7 @@
 apiVersion: score.dev/v1b1
 
 metadata:
-  name: "gj-pod-test"
+  name: "test"
 
 service:
   ports:
@@ -16,11 +16,11 @@ containers:
       CONNECTION_STRING: postgresql://${resources.psql-db.username}:${resources.psql-db.password}@${resources.psql-db.host}:${resources.psql-db.port}/${resources.psql-db.name}
     resources:
       limits:
-        memory: "128Mi"
-        cpu:  "500m"
+        memory: "256Mi"
+        cpu:  "1000m"
       requests:
-        memory: "64Mi"
-        cpu: "250m"
+        memory: "128Mi"
+        cpu: "500m"
 
 resources:
   psql-db:
