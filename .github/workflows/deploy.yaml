@@ -60,4 +60,4 @@ jobs:
 
           EOF
 
-          ./score-humanitec delta --env development --overrides ./humanitec.score.yaml --app gj-demo-app --org="${{ secrets.HUMANITEC_ORG_ID_UKG_48_HRS }}" --token "${{ secrets.HUMANITEC_TOKEN_UKG_48_HRS }}" --deploy
+          ./score-humanitec delta --env development --overrides ./humanitec.score.yaml --app test --org="${{ secrets.HUMANITEC_ORG_ID_UKG_48_HRS }}" --token "${{ secrets.HUMANITEC_TOKEN_UKG_48_HRS }}" --deploy
