@@ -1,7 +1,7 @@
 apiVersion: score.dev/v1b1
 
 metadata:
-  name: "test"
+  name: "gj-pod-test"
 
 service:
   ports:
@@ -23,6 +23,8 @@ containers:
         cpu: "500m"
 
 resources:
+  dns:
+    type: dns
   psql-db:
     type: postgres
     properties:
